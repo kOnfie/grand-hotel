@@ -1,15 +1,18 @@
-import { Text, View } from "react-native";
+import { CustomButton } from "@/components/ui/CustomButton";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { View } from "react-native";
 
 export default function Index() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/onboarding-1");
+  }, []);
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+    <View className="flex-1 flex-row items-center">
+      <CustomButton>Sign In</CustomButton>
     </View>
   );
 }
