@@ -1,17 +1,49 @@
 import { AuthHeader } from "@/components/ui/AuthHeader";
-import { AuthSeparator } from "@/components/ui/AuthSeparator";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { CustomIcon } from "@/components/ui/CustomIcon";
-import { AppleSvg, CloseEyeSvg, FacebookSvg, GoogleSvg, OpenEyeSvg } from "@/consts/icons";
-import { Link } from "expo-router";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ModalWindow } from "@/components/ui/ModalWindow";
+import { CloseEyeSvg, OpenEyeSvg } from "@/consts/icons";
+import { supabase } from "@/lib/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, Text, TextInput, View } from "react-native";
 
 export default function Signin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isActivePasswordFill, setIsActivePasswordFill] = useState(false);
   const [isRememberMe, setIsRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const router = useRouter();
+
+  async function signInWithEmail() {
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setIsLoading(false);
+        Alert.alert("Sign in error", error.message);
+      } else {
+        const user = data.user?.user_metadata;
+
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+
+        setIsLoading(false);
+        router.replace("/");
+      }
+    } catch (error) {
+      Alert.alert("Internal server error", error.message);
+      setIsLoading(false);
+      console.error(error);
+    }
+  }
 
   function updateField(field: string, value: string) {
     setFormData((prevState) => ({ ...prevState, [field]: value }));
@@ -19,6 +51,10 @@ export default function Signin() {
 
   return (
     <View>
+      <ModalWindow visible={isLoading} className="rounded-[50%] w-15 h-10">
+        <LoadingSpinner color="#007AFF" />
+      </ModalWindow>
+
       <AuthHeader title="Let’s Sign you in" subtitle="Lorem ipsum dolor sit amet, consectetur" />
 
       <View>
@@ -64,7 +100,9 @@ export default function Signin() {
           </Link>
         </View>
 
-        <CustomButton className="mb-6">Sign In</CustomButton>
+        <CustomButton className="mb-6" onPress={signInWithEmail}>
+          Sign In
+        </CustomButton>
 
         <Text className="text-center font-jost-semibold text-greyscale-600 mb-6">
           Don’t have an account?{" "}
@@ -73,9 +111,9 @@ export default function Signin() {
           </Link>
         </Text>
 
-        <AuthSeparator />
+        {/* <AuthSeparator /> */}
 
-        <View className="flex-row justify-center items-center gap-6 mb-[46px]">
+        {/* <View className="flex-row justify-center items-center gap-6 mb-[46px]">
           <Pressable className="w-[72px] h-[48px] flex items-center justify-center bg-greyscale-100 rounded-[8px]">
             <CustomIcon svg={GoogleSvg} size={24} />
           </Pressable>
@@ -85,7 +123,7 @@ export default function Signin() {
           <Pressable className="w-[72px] h-[48px] flex items-center justify-center bg-greyscale-100 rounded-[8px]">
             <CustomIcon svg={FacebookSvg} size={13} />
           </Pressable>
-        </View>
+        </View> */}
 
         <Text className="font-jost text-greyscale-400 text-center px-[60px]">
           By signing up you agree to our{" "}

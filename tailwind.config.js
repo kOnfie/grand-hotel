@@ -8,8 +8,12 @@ module.exports = {
         inter: ["Inter_400Regular"],
         "inter-medium": ["Inter_500Medium"],
         "inter-semibold": ["Inter_600SemiBold"],
+
+        jakarta: ["PlusJakartaSans_400Regular"],
+        "jakarta-medium": ["PlusJakartaSans_500Medium"],
         "jakarta-semibold": ["PlusJakartaSans_600SemiBold"],
         "jakarta-bold": ["PlusJakartaSans_700Bold"],
+
         jost: ["Jost_400Regular"],
         "jost-medium": ["Jost_500Medium"],
         "jost-semibold": ["Jost_600SemiBold"],

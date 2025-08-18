@@ -1,25 +1,62 @@
 import { AuthHeader } from "@/components/ui/AuthHeader";
-import { AuthSeparator } from "@/components/ui/AuthSeparator";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CustomButton } from "@/components/ui/CustomButton";
 import { CustomIcon } from "@/components/ui/CustomIcon";
-import { AppleSvg, CloseEyeSvg, FacebookSvg, GoogleSvg, OpenEyeSvg } from "@/consts/icons";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ModalWindow } from "@/components/ui/ModalWindow";
+import { CloseEyeSvg, OpenEyeSvg } from "@/consts/icons";
+import { supabase } from "@/lib/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, Text, TextInput, View } from "react-native";
 
 export default function Signup() {
   const [formData, setFormData] = useState({ fullname: "", email: "", password: "" });
   const [isActivePasswordFill, setIsActivePasswordFill] = useState(false);
   const [isRememberMe, setIsRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   function updateField(field: string, value: string) {
     setFormData((prevState) => ({ ...prevState, [field]: value }));
   }
 
+  async function signUpWithEmail() {
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+
+        options: {
+          data: {
+            fullname: formData.fullname,
+          },
+        },
+      });
+
+      if (error) {
+        Alert.alert("Create user error ", error.message);
+        setIsLoading(false);
+      } else {
+        await AsyncStorage.setItem("email", formData.email);
+        setIsLoading(false);
+
+        router.replace("/(auth)/enter-otp");
+      }
+    } catch (error) {
+      Alert.alert("Internal server error", "Try again please.");
+    }
+  }
+
   return (
     <View>
+      <ModalWindow visible={isLoading} className="rounded-[50%] w-15 h-10">
+        <LoadingSpinner color="#007AFF" />
+      </ModalWindow>
+
       <AuthHeader title="Create Account" subtitle="Lorem ipsum dolor sit amet, consectetur" />
 
       <View>
@@ -78,13 +115,13 @@ export default function Signup() {
           </Link>
         </View>
 
-        <CustomButton className="mb-6" onPress={() => router.push("/(auth)/enter-otp")}>
-          Create An Account
+        <CustomButton className="mb-6" onPress={signUpWithEmail}>
+          {isLoading ? "Loading..." : "Create An Account"}
         </CustomButton>
 
-        <AuthSeparator />
+        {/* <AuthSeparator /> */}
 
-        <View className="flex-row justify-center items-center gap-6 mb-[46px]">
+        {/* <View className="flex-row justify-center items-center gap-6 mb-[46px]">
           <Pressable className="w-[72px] h-[48px] flex items-center justify-center bg-greyscale-100 rounded-[8px]">
             <CustomIcon svg={GoogleSvg} size={24} />
           </Pressable>
@@ -94,7 +131,7 @@ export default function Signup() {
           <Pressable className="w-[72px] h-[48px] flex items-center justify-center bg-greyscale-100 rounded-[8px]">
             <CustomIcon svg={FacebookSvg} size={13} />
           </Pressable>
-        </View>
+        </View> */}
 
         <Text className="font-jost text-greyscale-400 text-center px-[60px]">
           By signing up you agree to our{" "}

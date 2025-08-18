@@ -1,10 +1,13 @@
 import { CustomButton } from "@/components/ui/CustomButton";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Onboarding1() {
   const router = useRouter();
+
+  useEffect(() => {}, []);
 
   return (
     <ImageBackground
